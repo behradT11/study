@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامه هفتگی مطالعه با آمار پیشرفت</title>
+    <!-- اتصال به Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- اتصال به فونت وزیرمتن -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <!-- اتصال به کتابخانه Tone.js برای افکت‌های صوتی -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <!-- اتصال به کتابخانه Chart.js برای نمودارها -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* استفاده از فونت وزیرمتن و استایل‌های سفارشی */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            transition: background-color 0.5s ease, background-image 0.5s ease;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .time-font { font-family: 'Vazirmatn', monospace; }
+        .task-completed td.task-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+             opacity: 0.6;
+        }
+        .modal { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease, opacity 0.3s; }
+        .modal.hidden .modal-content { transform: scale(0.95); opacity: 0; }
+        .modal.hidden { pointer-events: none; }
+        .bg-thumbnail {
+            width: 80px; height: 50px; background-size: cover; background-position: center;
+            border-radius: 0.5rem; cursor: pointer; border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .bg-thumbnail:hover, .bg-thumbnail.active { border-color: #4f46e5; }
+        .settings-tab {
+            cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent;
+            transition: border-color 0.3s, color 0.3s;
+        }
+        .settings-tab.active { border-color: #4f46e5; color: #4f46e5; }
+        .dark .settings-tab.active { color: #818cf8; border-color: #818cf8; }
+        /* Drag and Drop Styles */
+        tr.dragging { opacity: 0.5; background: #c7d2fe; }
+        tr.drag-over { border-top: 2px solid #4f46e5; }
+        /* Mini Timer Styles */
+        #mini-timer {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #mini-timer.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white backdrop-blur-sm bg-white/30 dark:bg-gray-900/30 rounded-lg p-2">🗓️ برنامه هفتگی مطالعه</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2 backdrop-blur-sm bg-white/30 dark:bg-gray-900/30 rounded-lg p-1">برنامه‌ریزی دقیق، کلید موفقیت شماست.</p>
+        </header>
+        
+        <section class="mb-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">ساعت فعلی</h3><div id="clock" class="text-4xl font-bold text-indigo-600 dark:text-indigo-400 time-font">--:--:--</div></div>
+                <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">تاریخ امروز</h3><div id="shamsi-date" class="text-xl font-bold text-gray-800 dark:text-gray-100">---</div><div id="gregorian-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">---</div></div>
+                <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">فعالیت الان</h3><div id="current-task" class="text-xl font-bold text-green-600 dark:text-green-400 h-16 flex items-center justify-center px-2">...</div></div>
+            </div>
+        </section>
+
+        <section id="pomodoro-section" class="mb-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6 text-center">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">⏱️ تایمر پومودورو</h2>
+            <div id="mode-buttons" class="flex justify-center items-center gap-2 mb-6">
+                <button data-mode="pomodoro" class="mode-button bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">پومودورو</button>
+                <button data-mode="shortBreak" class="mode-button bg-blue-500/50 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition">استراحت کوتاه</button>
+                <button data-mode="longBreak" class="mode-button bg-green-500/50 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition">استراحت طولانی</button>
+            </div>
+            <div class="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto mb-6">
+                <svg class="w-full h-full" viewBox="0 0 120 120"><circle class="text-gray-200 dark:text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="56" cx="60" cy="60" /><circle id="progress-ring" class="progress-ring__circle text-red-500" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="56" cx="60" cy="60" /></svg>
+                <div id="time-display" class="absolute inset-0 flex items-center justify-center text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white">25:00</div>
+            </div>
+            <div class="flex justify-center items-center gap-4"><button id="start-pause-button" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">شروع</button><button id="reset-button" class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-500 transition">ریست</button></div>
+        </section>
+
+        <section class="mb-8 flex justify-between items-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-3 rounded-xl shadow-md sticky top-2 z-10">
+             <button id="next-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">هفته بعد &larr;</button>
+            <div class="text-center">
+                 <h2 id="week-range-display" class="text-lg font-bold text-gray-800 dark:text-gray-200"></h2>
+                 <button id="today-btn" class="text-sm text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition">بازگشت به هفته جاری</button>
+            </div>
+             <button id="edit-schedule-toggle" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-transform transform hover:scale-105">ویرایش برنامه اصلی</button>
+            <button id="prev-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">&rarr; هفته قبل</button>
+        </section>
+
+        <main id="schedule-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Cards are generated here by JS -->
+        </main>
+        
+        <section id="progress-section" class="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6">
+            <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">📊 آمار کلی پیشرفت</h2>
+                <button id="export-excel-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105 shadow-lg">خروجی اکسل (CSV)</button>
+            </div>
+            <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">کارهای انجام شده بر اساس درس</h3><canvas id="subject-chart"></canvas></div>
+                <div><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">کارهای انجام شده در هفته</h3><canvas id="weekly-chart"></canvas></div>
+            </div>
+             <div id="no-data-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden"><p>هنوز داده‌ای برای نمایش نمودار وجود ندارد.</p></div>
+        </section>
+
+        <footer class="text-center mt-12 py-4 border-t dark:border-gray-700 backdrop-blur-sm bg-white/30 dark:bg-gray-900/30 rounded-lg"><p class="text-gray-600 dark:text-gray-400">با آرزوی موفقیت برای شما!</p></footer>
+    </div>
+    
+    <button id="open-settings-btn" class="fixed bottom-6 left-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-transform transform hover:scale-110 z-40">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    </button>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 modal hidden opacity-0">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 modal-content text-right">
+            <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">⚙️ تنظیمات</h3>
+                <button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="border-b dark:border-gray-600 mb-4"><nav class="flex -mb-px"><button data-tab="timing" class="settings-tab active">زمان‌بندی</button><button data-tab="appearance" class="settings-tab">ظاهر</button></nav></div>
+                <div id="timing-tab-content">
+                     <h4 class="text-lg font-semibold mb-3 dark:text-white">زمان‌بندی پومودورو (دقیقه)</h4>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-2"><label for="pomodoro-duration" class="dark:text-gray-300">پومودورو:</label><input type="number" id="pomodoro-duration" value="25" class="w-20 p-2 rounded border dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"></div>
+                        <div class="flex items-center gap-2"><label for="short-break-duration" class="dark:text-gray-300">استراحت کوتاه:</label><input type="number" id="short-break-duration" value="5" class="w-20 p-2 rounded border dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+                        <div class="flex items-center gap-2"><label for="long-break-duration" class="dark:text-gray-300">استراحت طولانی:</label><input type="number" id="long-break-duration" value="15" class="w-20 p-2 rounded border dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"></div>
+                    </div>
+                </div>
+                <div id="appearance-tab-content" class="hidden">
+                    <div class="flex items-center gap-4 mb-6"><span class="dark:text-gray-300">حالت نمایش:</span><button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"><svg id="theme-icon-sun" class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-15.66l-.7.7M4.04 19.96l-.7.7M21 12h-1M4 12H3m15.66 8.66l-.7-.7M4.04 4.04l-.7-.7M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg><svg id="theme-icon-moon" class="w-6 h-6 text-indigo-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg></button></div>
+                    <div class="dark:text-gray-300 mb-2">عکس پس‌زمینه:</div>
+                    <div id="background-selector" class="flex items-center gap-3 mt-2 flex-wrap">
+                        <button id="upload-background-btn" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">بارگذاری عکس</button>
+                        <input type="file" id="background-upload-input" class="hidden" accept="image/*">
+                        <button id="remove-background" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition">حذف</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 modal hidden opacity-0">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-11/12 md:w-1/3 modal-content">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4" id="confirmation-title">تایید تغییر</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-6" id="confirmation-message">آیا از این تغییر مطمئن هستید؟</p>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-change-btn" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition">انصراف</button>
+                <button id="confirm-change-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">بله، انجام بده</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Editor Modal -->
+    <div id="task-editor-modal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 modal hidden opacity-0">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-11/12 max-w-sm modal-content text-right">
+             <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="task-editor-title">ویرایش تسک</h3>
+                 <button id="close-task-editor-btn" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="task-title-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">عنوان تسک</label>
+                    <input type="text" id="task-title-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                </div>
+                 <div>
+                    <label for="task-time-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">زمان (مثال: 08:00-09:30)</label>
+                    <input type="text" id="task-time-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required pattern="\d{2}:\d{2}-\d{2}:\d{2}">
+                </div>
+            </div>
+             <div class="mt-6 flex justify-end">
+                 <button id="save-task-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">ذخیره</button>
+             </div>
+        </div>
+    </div>
+    
+    <!-- Mini Timer (Picture-in-Picture) -->
+    <div id="mini-timer" class="hidden fixed bottom-5 right-5 w-48 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-2xl p-3 z-50 cursor-move">
+        <div class="flex justify-between items-center mb-2">
+            <span id="mini-timer-mode" class="text-sm font-bold text-gray-700 dark:text-gray-300">پومودورو</span>
+            <button id="close-mini-timer" class="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 text-2xl leading-none">&times;</button>
+        </div>
+        <div id="mini-timer-display" class="text-center text-3xl font-bold time-font text-gray-900 dark:text-white">25:00</div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+            <div id="mini-timer-progress" class="bg-red-500 h-1.5 rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const allDOMElements = {
+        body: document.body, clock: document.getElementById('clock'), shamsiDate: document.getElementById('shamsi-date'), gregorianDate: document.getElementById('gregorian-date'),
+        currentTask: document.getElementById('current-task'), weekRange: document.getElementById('week-range-display'), scheduleGrid: document.getElementById('schedule-grid'),
+        prevWeekBtn: document.getElementById('prev-week-btn'), nextWeekBtn: document.getElementById('next-week-btn'), todayBtn: document.getElementById('today-btn'),
+        chartsContainer: document.getElementById('charts-container'), noDataMessage: document.getElementById('no-data-message'), exportExcelBtn: document.getElementById('export-excel-btn'),
+        confirmationModal: document.getElementById('confirmation-modal'), confirmChangeBtn: document.getElementById('confirm-change-btn'), cancelChangeBtn: document.getElementById('cancel-change-btn'),
+        openSettingsBtn: document.getElementById('open-settings-btn'), settingsModal: document.getElementById('settings-modal'), closeSettingsBtn: document.getElementById('close-settings-btn'),
+        themeToggle: document.getElementById('theme-toggle'), themeIconSun: document.getElementById('theme-icon-sun'), themeIconMoon: document.getElementById('theme-icon-moon'),
+        backgroundSelector: document.getElementById('background-selector'), removeBackgroundBtn: document.getElementById('remove-background'),
+        uploadBackgroundBtn: document.getElementById('upload-background-btn'), backgroundUploadInput: document.getElementById('background-upload-input'),
+        confirmationTitle: document.getElementById('confirmation-title'), confirmationMessage: document.getElementById('confirmation-message'),
+        editScheduleToggle: document.getElementById('edit-schedule-toggle'),
+        taskEditorModal: document.getElementById('task-editor-modal'),
+        closeTaskEditorBtn: document.getElementById('close-task-editor-btn'),
+        taskEditorTitle: document.getElementById('task-editor-title'),
+        taskTitleInput: document.getElementById('task-title-input'),
+        taskTimeInput: document.getElementById('task-time-input'),
+        saveTaskBtn: document.getElementById('save-task-btn'),
+        pomodoroSection: document.getElementById('pomodoro-section'),
+        miniTimer: document.getElementById('mini-timer'),
+        miniTimerDisplay: document.getElementById('mini-timer-display'),
+        miniTimerProgress: document.getElementById('mini-timer-progress'),
+        closeMiniTimer: document.getElementById('close-mini-timer'),
+        miniTimerMode: document.getElementById('mini-timer-mode'),
+    };
+
+    // --- Data ---
+    const shamsiMonths=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"],weekDayNames={0:"یکشنبه",1:"دوشنبه",2:"سه‌شنبه",3:"چهارشنبه",4:"پنج‌شنبه",5:"جمعه",6:"شنبه"},dayColors=['blue-600','indigo-600','purple-600','pink-600','red-600','orange-600','green-600'];
+    const defaultWeeklySchedule={'شنبه':[{time:"08:00-09:30",task:"ریاضی(مسائل تمرینی)"},{time:"10:00-11:00",task:"علوم(مرور مفاهیم)"},{time:"11:30-12:00",task:"تمرین پیانو"},{time:"14:00-15:00",task:"فارسی(روخوانی و درک مطلب)"},{time:"16:00-17:00",task:"هوش کلامی"},{time:"17:00-18:30",task:"ترید+مرور اجتماعی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات زبان"}],'یکشنبه':[{time:"08:00-09:30",task:"هوش منطقی"},{time:"10:00-11:30",task:"هوش تصویری"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"دینی(مرور و حفظ آیات)"},{time:"16:00-17:00",task:"ریاضی(مرور فرمول‌ها)"},{time:"17:00-18:30",task:"ترید+مرور دینی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات"}],'دوشنبه':[{time:"08:00-09:30",task:"فارسی(املاء و معنی واژه‌ها)"},{time:"10:00-11:30",task:"عربی(قواعد+تمرین)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"هوش تصویری"},{time:"16:00-17:00",task:"علوم"},{time:"17:00-18:30",task:"ترید+مرور اجتماعی"},{time:"18:30-19:00",task:"کلاس پیانو"},{time:"19:00-21:00",task:"ترید+مرور سبک"}],'سه‌شنبه':[{time:"08:00-09:30",task:"ریاضی(سوالات تستی)"},{time:"10:00-11:30",task:"علوم(آزمایش‌ها و نکات)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"اجتماعی"},{time:"16:00-17:00",task:"دینی"},{time:"17:00-18:30",task:"ترید+مرور عربی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات"}],'چهارشنبه':[{time:"08:00-09:30",task:"عربی(سوالات درک مطلب)"},{time:"10:00-11:30",task:"فارسی(نگارش و روخوانی)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"علوم"},{time:"16:00-17:00",task:"ریاضی"},{time:"17:00-19:00",task:"ترید+مرور زبان"},{time:"19:00-21:00",task:"هوش کلامی"}],'پنج‌شنبه':[{time:"08:00-09:30",task:"دینی+اجتماعی"},{time:"10:00-11:30",task:"ریاضی"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"هوش تصویری"},{time:"16:00-17:00",task:"مرور کلی دروس حفظی"},{time:"17:00-19:00",task:"ترید+مرور فارسی"},{time:"19:00-21:00",task:"زبان(مرور لغات+مکالمه)"}],'جمعه':[{time:"08:00-09:30",task:"آزمون شبیه‌ساز تیزهوشان"},{time:"10:00-11:00",task:"بررسی پاسخ‌ها"},{time:"11:30-12:00",task:"تمرین پیانو"},{time:"14:00-15:00",task:"تفریح و بازی"},{time:"16:00-17:00",task:"دیدار با خانواده"},{time:"17:00-19:00",task:"ترید+مرور سبک"},{time:"19:00-20:00",task:"جمع‌بندی هفتگی"}]};
+    const backgroundImages=[{name:'کتابخانه',url:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2128&auto=format&fit=crop'},{name:'طبیعت',url:'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2400&auto=format&fit=crop'},{name:'انتزاعی',url:'https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=2348&auto=format&fit=crop'},{name:'کهکشان',url:'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2342&auto=format&fit=crop'},{name:'مینیمال',url:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2225&auto=format&fit=crop'},{name:'کوهستان',url:'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=2340&auto=format&fit=crop'}];
+    
+    // --- State ---
+    let appState = {
+        history: JSON.parse(localStorage.getItem('studyHistory_v11')) || [],
+        masterSchedule: JSON.parse(localStorage.getItem('masterSchedule_v11')) || defaultWeeklySchedule,
+        currentDate: new Date(),
+        today: new Date(),
+        isEditMode: false,
+        itemToProcess: null, // Can be a row <tr>
+        actionToConfirm: null, // 'toggle', 'deleteMasterTask'
+        taskToEdit: null, // {dayName, originalTask} for editing
+    };
+    appState.today.setHours(0, 0, 0, 0);
+
+    // --- Date & Time Utils ---
+    function toJalaali(d){const g=[0,31,59,90,120,151,181,212,243,273,304,334],y=d.getFullYear(),m=d.getMonth()+1,dt=d.getDate(),y2=(m>2)?y+1:y;let ds=355666+(365*y)+Math.floor((y2+3)/4)-Math.floor((y2+99)/100)+Math.floor((y2+399)/400)+dt+g[m-1];let jy=-1595+(33*Math.floor(ds/12053));ds%=12053;jy+=4*Math.floor(ds/1461);ds%=1461;if(ds>365){jy+=Math.floor((ds-1)/365);ds=(ds-1)%365}const jm=(ds<186)?1+Math.floor(ds/31):7+Math.floor((ds-186)/30);const jd=1+((ds<186)?(ds%31):(ds-186)%30);return[jy,jm,jd]}
+    function getShamsiString(d){const[y,m,j]=toJalaali(d);return`${y}-${String(m).padStart(2,'0')}-${String(j).padStart(2,'0')}`}
+    
+    // --- Rendering ---
+    function renderWeek(d){appState.currentDate=new Date(d);let ws=new Date(appState.currentDate);ws.setDate(ws.getDate()-(ws.getDay()+1)%7);allDOMElements.scheduleGrid.innerHTML='';const o=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];let wd=[];for(let i=0;i<7;i++){let dd=new Date(ws);dd.setDate(ws.getDate()+i);wd.push(dd);const c=createDayCard(dd,o[i],i);allDOMElements.scheduleGrid.appendChild(c)}updateWeekRangeDisplay(wd[0],wd[6]);updateCharts()}
+    
+    function createDayCard(d,dn,di){
+        const shamsi=getShamsiString(d);
+        const card=document.createElement('div');
+        card.className=`day-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden`;
+        
+        let allTasks = appState.masterSchedule[dn] || [];
+        
+        let trs=allTasks.map(item=>{
+            const taskId=`${shamsi}-${item.task}`;
+            const isCompleted=appState.history.some(h=>h.id===taskId);
+            return`<tr class="border-b dark:border-gray-700 last:border-b-0 ${isCompleted?'task-completed':''}" data-task-obj='${JSON.stringify(item)}' data-day-name="${dn}">
+            <td class="px-2 py-4 text-center cursor-pointer"><input type="checkbox" class="task-checkbox pointer-events-none w-5 h-5" ${isCompleted?'checked':''}></td>
+            <td class="px-4 py-4 font-medium task-text">${item.task}</td>
+            <td class="px-4 py-4 text-gray-500 dark:text-gray-400 font-sans">${item.time||''}</td>
+            <td class="task-actions px-2 py-4 text-center ${appState.isEditMode ? '' : 'hidden'}">
+                 <button class="edit-task-btn text-blue-500 hover:text-blue-700">✏️</button>
+                 <button class="delete-task-btn text-red-500 hover:text-red-700">🗑️</button>
+            </td>
+            </tr>`}).join('');
+        const[sy,sm,sd]=toJalaali(d);
+        card.innerHTML=`<h2 class="text-2xl font-bold text-white bg-${dayColors[di%7]} p-4 flex justify-between items-center"><span>${dn}</span><span class="text-sm font-normal">${sd} ${shamsiMonths[sm-1]}</span></h2><div class="p-2"><table class="w-full text-sm text-right"><thead><tr><th class="px-2 py-2 w-10">انجام</th><th class="px-4 py-2">فعالیت</th><th class="px-4 py-2 w-24">زمان</th><th class="task-actions px-2 py-2 w-20 ${appState.isEditMode ? '' : 'hidden'}">عملیات</th></tr></thead><tbody class="divide-y divide-gray-200 dark:divide-gray-700">${trs}</tbody></table><div class="p-2 task-actions ${appState.isEditMode ? '' : 'hidden'}"><button class="add-task-btn w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">+ افزودن تسک جدید</button></div></div>`;
+        return card;
+    }
+
+    // --- Modals & Context Menu ---
+    function showModal(m){m.classList.remove('hidden','opacity-0')}
+    function hideModal(m){m.classList.add('opacity-0');setTimeout(()=>{m.classList.add('hidden');appState.itemToProcess=null;appState.actionToConfirm=null},300)}
+    const tabs=allDOMElements.settingsModal.querySelectorAll('.settings-tab'),tabContents={timing:allDOMElements.settingsModal.querySelector('#timing-tab-content'),appearance:allDOMElements.settingsModal.querySelector('#appearance-tab-content')};tabs.forEach(t=>{t.addEventListener('click',()=>{tabs.forEach(tb=>tb.classList.remove('active'));t.classList.add('active');Object.values(tabContents).forEach(c=>c.classList.add('hidden'));tabContents[t.dataset.tab].classList.remove('hidden')})});
+    
+    // --- Appearance ---
+    function applyTheme(t){document.documentElement.className=t;allDOMElements.themeIconSun.classList.toggle('hidden',t==='dark');allDOMElements.themeIconMoon.classList.toggle('hidden',t!=='dark');localStorage.setItem('theme_v11',t);updateCharts()}
+    function applyBackground(u){if(u){allDOMElements.body.style.backgroundImage=`url('${u}')`;localStorage.setItem('backgroundUrl_v11',u)}else{allDOMElements.body.style.backgroundImage='none';localStorage.removeItem('backgroundUrl_v11')}document.querySelectorAll('.bg-thumbnail').forEach(t=>{t.classList.toggle('active',t.dataset.url===u)})}
+    function setupAppearance(){const st=localStorage.getItem('theme_v11')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');applyTheme(st);backgroundImages.forEach(b=>{const t=document.createElement('div');t.className='bg-thumbnail';t.style.backgroundImage=`url('${b.url}')`;t.dataset.url=b.url;t.title=b.name;allDOMElements.backgroundSelector.insertBefore(t,allDOMElements.removeBackgroundBtn)});const sb=localStorage.getItem('backgroundUrl_v11');if(sb){applyBackground(sb)}}
+
+    // --- Event Handlers ---
+    allDOMElements.scheduleGrid.addEventListener('click', (e) => {
+        const row = e.target.closest('tr');
+        if (!row && !e.target.closest('.add-task-btn')) return;
+
+        if (e.target.closest('.edit-task-btn')) {
+            openTaskEditor(row.closest('.day-card').querySelector('h2 span').textContent, JSON.parse(row.dataset.taskObj));
+        } else if (e.target.closest('.delete-task-btn')) {
+            appState.itemToProcess = {
+                dayName: row.closest('.day-card').querySelector('h2 span').textContent,
+                task: JSON.parse(row.dataset.taskObj)
+            };
+            appState.actionToConfirm = 'deleteMasterTask';
+            allDOMElements.confirmationTitle.textContent = "تایید حذف";
+            allDOMElements.confirmationMessage.textContent = `آیا از حذف تسک "${appState.itemToProcess.task.task}" مطمئن هستید؟ این عمل دائمی است.`;
+            showModal(allDOMElements.confirmationModal);
+        } else if (e.target.closest('.add-task-btn')) {
+            openTaskEditor(e.target.closest('.day-card').querySelector('h2 span').textContent);
+        } else if (!appState.isEditMode && row) {
+             const checkbox = row.querySelector('.task-checkbox');
+             checkbox.checked = !checkbox.checked;
+             updateTaskHistory(row, checkbox.checked);
+        }
+    });
+    
+    allDOMElements.confirmChangeBtn.addEventListener('click',()=>{if(!appState.actionToConfirm)return;if(appState.actionToConfirm==='deleteMasterTask'&&appState.itemToProcess){const{dayName,task}=appState.itemToProcess;appState.masterSchedule[dayName]=appState.masterSchedule[dayName].filter(t=>t.task!==task.task);saveMasterSchedule();renderWeek(appState.currentDate)}hideModal(allDOMElements.confirmationModal)});
+    allDOMElements.cancelChangeBtn.addEventListener('click',()=>hideModal(allDOMElements.confirmationModal));
+    allDOMElements.openSettingsBtn.addEventListener('click',()=>showModal(allDOMElements.settingsModal));
+    allDOMElements.closeSettingsBtn.addEventListener('click',()=>hideModal(allDOMElements.settingsModal));
+    allDOMElements.themeToggle.addEventListener('click',()=>{const nt=document.documentElement.classList.contains('dark')?'light':'dark';applyTheme(nt)});
+    allDOMElements.backgroundSelector.addEventListener('click',(e)=>{if(e.target.classList.contains('bg-thumbnail')){applyBackground(e.target.dataset.url)}});
+    allDOMElements.removeBackgroundBtn.addEventListener('click',()=>applyBackground(null));
+    allDOMElements.uploadBackgroundBtn.addEventListener('click',()=>allDOMElements.backgroundUploadInput.click());
+    allDOMElements.backgroundUploadInput.addEventListener('change',(e)=>{const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=res=>{applyBackground(res.target.result);localStorage.setItem('backgroundUrl_v11',res.target.result)};reader.readAsDataURL(file)}});
+
+    allDOMElements.editScheduleToggle.addEventListener('click', (e) => {
+        appState.isEditMode = !appState.isEditMode;
+        e.target.textContent = appState.isEditMode ? 'ذخیره تغییرات' : 'ویرایش برنامه اصلی';
+        e.target.classList.toggle('bg-amber-500', !appState.isEditMode);
+        e.target.classList.toggle('hover:bg-amber-600', !appState.isEditMode);
+        e.target.classList.toggle('bg-green-500', appState.isEditMode);
+        e.target.classList.toggle('hover:bg-green-600', appState.isEditMode);
+        allDOMElements.scheduleGrid.querySelectorAll('.task-actions, .add-task-btn').forEach(el => {
+            el.classList.toggle('hidden', !appState.isEditMode);
+        });
+        if (!appState.isEditMode) {
+            saveMasterSchedule();
+        }
+    });
+
+    function saveMasterSchedule() {
+        localStorage.setItem('masterSchedule_v11', JSON.stringify(appState.masterSchedule));
+    }
+    
+    // --- Task Editor ---
+    function openTaskEditor(dayName, task = null) {
+        appState.taskToEdit = { dayName, originalTask: task };
+        allDOMElements.taskEditorTitle.textContent = task ? "ویرایش تسک" : "افزودن تسک جدید";
+        allDOMElements.taskTitleInput.value = task ? task.task : '';
+        allDOMElements.taskTimeInput.value = task ? task.time : '';
+        showModal(allDOMElements.taskEditorModal);
+    }
+
+    allDOMElements.closeTaskEditorBtn.addEventListener('click', () => hideModal(allDOMElements.taskEditorModal));
+    allDOMElements.saveTaskBtn.addEventListener('click', () => {
+        const { dayName, originalTask } = appState.taskToEdit;
+        const newTitle = allDOMElements.taskTitleInput.value.trim();
+        const newTime = allDOMElements.taskTimeInput.value.trim();
+        const timeRegex = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+
+        if (!newTitle || !newTime || !timeRegex.test(newTime)) {
+            alert("لطفا عنوان و زمان را با فرمت صحیح (مثال: 08:00-09:30) وارد کنید.");
+            return;
+        }
+
+        if (originalTask) { // Editing
+            const taskIndex = appState.masterSchedule[dayName].findIndex(t => t.task === originalTask.task);
+            if (taskIndex !== -1) {
+                appState.masterSchedule[dayName][taskIndex] = { task: newTitle, time: newTime };
+            }
+        } else { // Adding
+            appState.masterSchedule[dayName].push({ task: newTitle, time: newTime });
+        }
+        
+        saveMasterSchedule();
+        renderWeek(appState.currentDate);
+        hideModal(allDOMElements.taskEditorModal);
+    });
+
+    // --- History & State Updates ---
+    function updateTaskHistory(row,isChecked){const taskObj=JSON.parse(row.dataset.taskObj);const taskId=`${getShamsiString(appState.currentDate)}-${taskObj.task}`;const day=row.closest('.day-card').querySelector('h2>span:first-child').textContent;if(isChecked){if(!appState.history.some(h=>h.id===taskId)){appState.history.push({id:taskId,date:getShamsiString(appState.currentDate),day,task:taskObj.task})}}else{appState.history=appState.history.filter(h=>h.id!==taskId)}localStorage.setItem('studyHistory_v11',JSON.stringify(appState.history));row.classList.toggle('task-completed',isChecked);updateCharts()}
+    
+    // Navigation and other handlers
+    allDOMElements.prevWeekBtn.addEventListener('click',()=>{appState.currentDate.setDate(appState.currentDate.getDate()-7);renderWeek(appState.currentDate)});
+    allDOMElements.nextWeekBtn.addEventListener('click',()=>{appState.currentDate.setDate(appState.currentDate.getDate()+7);renderWeek(appState.currentDate)});
+    allDOMElements.todayBtn.addEventListener('click',()=>renderWeek(new Date()));
+    allDOMElements.exportExcelBtn.addEventListener('click',exportToExcel);
+    function updateWeekRangeDisplay(s,e){const[sy,sm,sd]=toJalaali(s);const[ey,em,ed]=toJalaali(e);allDOMElements.weekRange.textContent=`هفته: ${sd} ${shamsiMonths[sm-1]} تا ${ed} ${shamsiMonths[em-1]} ${ey}`}
+    function exportToExcel(){if(appState.history.length===0){alert("تاریخچه‌ای برای خروجی گرفتن وجود ندارد.");return}let c="data:text/csv;charset=utf-8,\uFEFF";c+="تاریخ,روز هفته,شرح فعالیت\n";const s=[...appState.history].sort((a,b)=>a.date.localeCompare(b.date));s.forEach(i=>{const r=[i.date,i.day,`"${i.task.replace(/"/g,'""')}"`].join(",");c+=r+"\n"});const l=document.createElement("a");l.setAttribute("href",encodeURI(c));l.setAttribute("download","study_history.csv");allDOMElements.body.appendChild(l);l.click();allDOMElements.body.removeChild(l)}
+    
+    // Chart Logic
+    let subjectChartInstance=null,weeklyChartInstance=null;
+    function getSubjectFromTask(t){const s=['ریاضی','علوم','فارسی','هوش','ترید','زبان','دینی','عربی','اجتماعی','پیانو','آزمون'];for(const subj of s){if(t.includes(subj))return subj}return'متفرقه'}
+    function updateCharts(){const isDark=document.documentElement.classList.contains('dark');const textColor=isDark?'#E5E7EB':'#374151';const gridColor=isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)';if(appState.history.length===0){allDOMElements.chartsContainer.classList.add('hidden');allDOMElements.noDataMessage.classList.remove('hidden');return}allDOMElements.chartsContainer.classList.remove('hidden');allDOMElements.noDataMessage.classList.add('hidden');const sC=appState.history.reduce((a,i)=>{const s=getSubjectFromTask(i.task);a[s]=(a[s]||0)+1;return a},{});const wO=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];const wC=wO.reduce((a,d)=>({...a,[d]:0}),{});appState.history.forEach(i=>{if(wC.hasOwnProperty(i.day))wC[i.day]++});renderSubjectChart(Object.keys(sC),Object.values(sC),textColor);renderWeeklyChart(Object.keys(wC),Object.values(wC),textColor,gridColor)}
+    function renderSubjectChart(l,d,tc){const c=document.getElementById('subject-chart').getContext('2d');if(subjectChartInstance)subjectChartInstance.destroy();subjectChartInstance=new Chart(c,{type:'doughnut',data:{labels:l,datasets:[{data:d,backgroundColor:['#3B82F6','#8B5CF6','#EC4899','#F97316','#10B981','#F59E0B','#6366F1','#D946EF','#06B6D4','#EF4444'],borderColor:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',borderWidth:3,hoverOffset:12}]},options:{responsive:true,animation:{duration:1000,easing:'easeOutQuart'},plugins:{legend:{position:'top',labels:{font:{family:'Vazirmatn'},color:tc}}}}})}
+    function renderWeeklyChart(l,d,tc,gc){const c=document.getElementById('weekly-chart').getContext('2d');if(weeklyChartInstance)weeklyChartInstance.destroy();const g=c.createLinearGradient(0,0,0,400);g.addColorStop(0,'rgba(59, 130, 246, 0.8)');g.addColorStop(1,'rgba(167, 139, 250, 0.8)');weeklyChartInstance=new Chart(c,{type:'bar',data:{labels:l,datasets:[{label:'تسک‌های انجام شده',data:d,backgroundColor:g,borderColor:'rgba(59, 130, 246, 1)',borderWidth:2,borderRadius:8,hoverBackgroundColor:'rgba(59, 130, 246, 1)'}]},options:{responsive:true,animation:{duration:1200,easing:'easeInOutBounce'},scales:{y:{beginAtZero:true,ticks:{color:tc,font:{family:'Vazirmatn'},stepSize:1},grid:{color:gc}},x:{ticks:{color:tc,font:{family:'Vazirmatn'}},grid:{color:gc}}},plugins:{legend:{display:false}}}})}
+    
+    // Clock and Pomodoro
+    function updateClock(){
+        const n=new Date();
+        allDOMElements.clock.textContent=n.toLocaleTimeString('fa-IR',{hour12:false});
+        const[jY,jM,jD]=toJalaali(n);
+        allDOMElements.shamsiDate.textContent=`${weekDayNames[n.getDay()]}، ${jD} ${shamsiMonths[jM-1]} ${jY}`;
+        allDOMElements.gregorianDate.textContent=`${n.getDate()} ${n.toLocaleString('fa-IR',{month:'long'})} ${n.getFullYear()}`;
+        const schedule=appState.masterSchedule[weekDayNames[n.getDay()]];
+        let t="زمان آزاد";
+        if(schedule){
+            const c=n.toTimeString().slice(0,5);
+            for(const l of schedule){
+                if(l.time&&l.time.includes('-')){
+                    const[start,end]=l.time.split('-');
+                    if(c>=start&&c<end){
+                        t=l.task;
+                        break
+                    }
+                }
+            }
+        }
+        allDOMElements.currentTask.textContent=t;
+    }
+    const timeDisplay=document.getElementById('time-display'),startPauseButton=document.getElementById('start-pause-button'),resetButton=document.getElementById('reset-button'),modeButtons=document.querySelectorAll('.mode-button'),progressRing=document.getElementById('progress-ring'),pomodoroInput=document.getElementById('pomodoro-duration'),shortBreakInput=document.getElementById('short-break-duration'),longBreakInput=document.getElementById('long-break-duration');let timerInterval=null,isRunning=false,mode='pomodoro',timeLeft,totalTime;const synth=new Tone.Synth().toDestination();const radius=progressRing.r.baseVal.value;const circumference=radius*2*Math.PI;progressRing.style.strokeDasharray=`${circumference} ${circumference}`;progressRing.style.strokeDashoffset=circumference;const getDurations=()=>({pomodoro:parseInt(pomodoroInput.value)*60,shortBreak:parseInt(shortBreakInput.value)*60,longBreak:parseInt(longBreakInput.value)*60});function setProgress(p){const o=circumference-(p/100)*p;progressRing.style.strokeDashoffset=o}
+    function updateTimerDisplay(){const m=Math.floor(timeLeft/60),s=timeLeft%60,f=`${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;timeDisplay.textContent=f;document.title=`${f} - برنامه مطالعه`;const p=totalTime>0?((totalTime-timeLeft)/totalTime)*100:0;setProgress(p);allDOMElements.miniTimerDisplay.textContent=f;const miniProgressPercent=totalTime>0?(timeLeft/totalTime)*100:0;allDOMElements.miniTimerProgress.style.width=`${miniProgressPercent}%`}
+    function startTimer(){if(isRunning)return;isRunning=true;startPauseButton.textContent='توقف';Tone.start();timerInterval=setInterval(()=>{timeLeft--;updateTimerDisplay();if(timeLeft<=0){clearInterval(timerInterval);synth.triggerAttackRelease("C5","0.5");isRunning=false;startPauseButton.textContent='شروع';document.title="برنامه هفتگی مطالعه";const nextMode=mode==='pomodoro'?'shortBreak':'pomodoro';switchMode(nextMode)}},1000)}
+    function pauseTimer(){if(!isRunning)return;isRunning=false;clearInterval(timerInterval);startPauseButton.textContent='ادامه'}
+    function resetTimer(){pauseTimer();const d=getDurations();timeLeft=d[mode]||d.pomodoro;totalTime=timeLeft;updateTimerDisplay();startPauseButton.textContent='شروع'}
+    function switchMode(n){mode=n;pauseTimer();const d=getDurations();timeLeft=d[mode]||d.pomodoro;totalTime=timeLeft;updateTimerDisplay();startPauseButton.textContent='شروع';const c={pomodoro:'red',shortBreak:'blue',longBreak:'green'};progressRing.className.baseVal=`progress-ring__circle text-${c[mode]}-500`;allDOMElements.miniTimerProgress.className=`bg-${c[mode]}-500 h-1.5 rounded-full transition-all duration-500`;const modeTexts={pomodoro:'پومودورو',shortBreak:'استراحت کوتاه',longBreak:'استراحت طولانی'};allDOMElements.miniTimerMode.textContent=modeTexts[n];modeButtons.forEach(b=>{const m=b.dataset.mode,o=c[m];b.classList.toggle(`bg-${o}-500`,m===n);b.classList.toggle(`bg-${o}-500/50`,m!==n)})}
+    startPauseButton.addEventListener('click',()=>{if(isRunning)pauseTimer();else startTimer()});resetButton.addEventListener('click',resetTimer);modeButtons.forEach(b=>{b.addEventListener('click',()=>switchMode(b.dataset.mode))});[pomodoroInput,shortBreakInput,longBreakInput].forEach(i=>{i.addEventListener('change',()=>{if(!isRunning)resetTimer()})});
+
+     // --- Mini Timer Logic ---
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden' && isRunning) {
+            allDOMElements.miniTimer.classList.remove('hidden');
+        } else {
+            allDOMElements.miniTimer.classList.add('hidden');
+        }
+    });
+
+    allDOMElements.closeMiniTimer.addEventListener('click', () => {
+        pauseTimer();
+        allDOMElements.miniTimer.classList.add('hidden');
+    });
+
+    let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
+    allDOMElements.miniTimer.addEventListener('mousedown', (e) => {
+        if (e.target.closest('button')) return;
+        isDragging = true;
+        dragOffsetX = e.clientX - allDOMElements.miniTimer.getBoundingClientRect().left;
+        dragOffsetY = e.clientY - allDOMElements.miniTimer.getBoundingClientRect().top;
+        allDOMElements.miniTimer.style.transition = 'none';
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        let newX = e.clientX - dragOffsetX;
+        let newY = e.clientY - dragOffsetY;
+        const bodyRect = document.body.getBoundingClientRect();
+        const miniRect = allDOMElements.miniTimer.getBoundingClientRect();
+        if (newX < 0) newX = 0;
+        if (newY < 0) newY = 0;
+        if (newX + miniRect.width > bodyRect.width) newX = bodyRect.width - miniRect.width;
+        if (newY + miniRect.height > bodyRect.height) newY = bodyRect.height - miniRect.height;
+        allDOMElements.miniTimer.style.left = `${newX}px`;
+        allDOMElements.miniTimer.style.top = `${newY}px`;
+    });
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        allDOMElements.miniTimer.style.transition = '';
+    });
+
+    // --- INITIALIZATION ---
+    setupAppearance();
+    updateClock();
+    setInterval(updateClock, 1000);
+    renderWeek(new Date());
+    switchMode('pomodoro');
+});
+</script>
+
+</body>
+</html>
