@@ -43,12 +43,12 @@
             transition: border-color 0.3s;
         }
         .bg-thumbnail:hover, .bg-thumbnail.active { border-color: #4f46e5; }
-        .settings-tab {
+        .settings-tab, .chart-tab {
             cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent;
             transition: border-color 0.3s, color 0.3s;
         }
-        .settings-tab.active { border-color: #4f46e5; color: #4f46e5; }
-        .dark .settings-tab.active { color: #818cf8; border-color: #818cf8; }
+        .settings-tab.active, .chart-tab.active { border-color: #4f46e5; color: #4f46e5; }
+        .dark .settings-tab.active, .dark .chart-tab.active { color: #818cf8; border-color: #818cf8; }
         /* Drag and Drop Styles */
         tr.dragging { opacity: 0.5; background: #c7d2fe; }
         tr.drag-over { border-top: 2px solid #4f46e5; }
@@ -66,21 +66,23 @@
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-
         <header class="text-center mb-10">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white backdrop-blur-sm bg-white/30 dark:bg-gray-900/30 rounded-lg p-2">🗓️ برنامه هفتگی مطالعه</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2 backdrop-blur-sm bg-white/30 dark:bg-gray-900/30 rounded-lg p-1">برنامه‌ریزی دقیق، کلید موفقیت شماست.</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 rounded-lg p-2">🗓️ برنامه هفتگی مطالعه</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2 backdrop-blur-sm bg-white/60 dark:bg-gray-900/30 rounded-lg p-1">برنامه‌ریزی دقیق، کلید موفقیت شماست.</p>
         </header>
         
-        <section class="mb-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6">
+        <section class="mb-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl p-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                 <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">ساعت فعلی</h3><div id="clock" class="text-4xl font-bold text-indigo-600 dark:text-indigo-400 time-font">--:--:--</div></div>
                 <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">تاریخ امروز</h3><div id="shamsi-date" class="text-xl font-bold text-gray-800 dark:text-gray-100">---</div><div id="gregorian-date" class="text-sm text-gray-500 dark:text-gray-400 mt-1">---</div></div>
-                <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl"><h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">فعالیت الان</h3><div id="current-task" class="text-xl font-bold text-green-600 dark:text-green-400 h-16 flex items-center justify-center px-2">...</div></div>
+                <div class="flex flex-col items-center justify-center p-4 bg-gray-50/80 dark:bg-gray-700/80 rounded-xl">
+                    <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">فعالیت الان</h3>
+                    <div id="current-task" class="text-xl font-bold text-green-600 dark:text-green-400 h-16 flex items-center justify-center px-2">...</div>
+                </div>
             </div>
         </section>
 
-        <section id="pomodoro-section" class="mb-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6 text-center">
+        <section id="pomodoro-section" class="mb-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl p-6 text-center">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">⏱️ تایمر پومودورو</h2>
             <div id="mode-buttons" class="flex justify-center items-center gap-2 mb-6">
                 <button data-mode="pomodoro" class="mode-button bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">پومودورو</button>
@@ -94,7 +96,7 @@
             <div class="flex justify-center items-center gap-4"><button id="start-pause-button" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">شروع</button><button id="reset-button" class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-500 transition">ریست</button></div>
         </section>
 
-        <section class="mb-8 flex flex-wrap justify-center sm:justify-between items-center gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-3 rounded-xl shadow-md sticky top-2 z-10">
+        <section class="mb-8 flex flex-wrap justify-center sm:justify-between items-center gap-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md p-3 rounded-xl shadow-md sticky top-2 z-10">
             <button id="prev-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">&rarr; هفته قبل</button>
             
             <div class="text-center order-first w-full sm:w-auto sm:order-none">
@@ -102,10 +104,16 @@
                  <button id="today-btn" class="text-sm text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition">بازگشت به هفته جاری</button>
             </div>
 
-            <button id="edit-schedule-toggle" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-transform transform hover:scale-105 grow sm:grow-0">
-                <span class="sm:hidden">ویرایش</span>
-                <span class="hidden sm:inline">ویرایش برنامه اصلی</span>
-            </button>
+            <div id="edit-mode-container" class="relative grow sm:grow-0">
+                <button id="edit-schedule-toggle" class="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-transform transform hover:scale-105">
+                    <span class="sm:hidden">ویرایش</span>
+                    <span class="hidden sm:inline">ویرایش برنامه</span>
+                </button>
+                <div id="edit-options" class="hidden absolute top-full right-0 mt-2 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg z-20">
+                     <button data-edit-mode="week" class="block w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">فقط این هفته</button>
+                     <button data-edit-mode="main" class="block w-full text-right px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">برنامه اصلی</button>
+                </div>
+            </div>
             
             <button id="next-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">هفته بعد &larr;</button>
         </section>
@@ -114,14 +122,21 @@
             <!-- Cards are generated here by JS -->
         </main>
         
-        <section id="progress-section" class="mt-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-xl p-6">
-            <div class="flex justify-between items-center mb-8 flex-wrap gap-4">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">📊 آمار کلی پیشرفت</h2>
+        <section id="progress-section" class="mt-12 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl p-6">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">📊 آمار پیشرفت</h2>
                 <button id="export-excel-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105 shadow-lg">خروجی اکسل (CSV)</button>
             </div>
-            <div id="charts-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <div><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">کارهای انجام شده بر اساس درس</h3><canvas id="subject-chart"></canvas></div>
-                <div><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">کارهای انجام شده در هفته</h3><canvas id="weekly-chart"></canvas></div>
+             <div class="border-b border-gray-200 dark:border-gray-700">
+                <nav id="chart-tabs" class="flex -mb-px space-x-4 space-x-reverse overflow-x-auto">
+                    <button data-chart="count" class="chart-tab active whitespace-nowrap">تعداد تسک</button>
+                    <button data-chart="time" class="chart-tab whitespace-nowrap">زمان مطالعه</button>
+                    <button data-chart="daily" class="chart-tab whitespace-nowrap">روند روزانه</button>
+                    <button data-chart="weekly" class="chart-tab whitespace-nowrap">مقایسه هفته</button>
+                </nav>
+            </div>
+            <div id="charts-container" class="mt-4 h-80">
+                <canvas id="main-chart"></canvas>
             </div>
              <div id="no-data-message" class="text-center text-gray-500 dark:text-gray-400 py-8 hidden"><p>هنوز داده‌ای برای نمایش نمودار وجود ندارد.</p></div>
         </section>
@@ -224,6 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadBackgroundBtn: document.getElementById('upload-background-btn'), backgroundUploadInput: document.getElementById('background-upload-input'),
         confirmationTitle: document.getElementById('confirmation-title'), confirmationMessage: document.getElementById('confirmation-message'),
         editScheduleToggle: document.getElementById('edit-schedule-toggle'),
+        editOptions: document.getElementById('edit-options'),
+        editModeContainer: document.getElementById('edit-mode-container'),
         taskEditorModal: document.getElementById('task-editor-modal'),
         closeTaskEditorBtn: document.getElementById('close-task-editor-btn'),
         taskEditorTitle: document.getElementById('task-editor-title'),
@@ -236,23 +253,32 @@ document.addEventListener('DOMContentLoaded', () => {
         miniTimerProgress: document.getElementById('mini-timer-progress'),
         closeMiniTimer: document.getElementById('close-mini-timer'),
         miniTimerMode: document.getElementById('mini-timer-mode'),
+        chartTabs: document.getElementById('chart-tabs'),
+        mainChartCanvas: document.getElementById('main-chart'),
+        confirmCurrentTaskBtn: document.getElementById('confirm-current-task'),
+        skipCurrentTaskBtn: document.getElementById('skip-current-task'),
+        quotesContainer: document.getElementById('quotes-container'),
     };
 
     // --- Data ---
     const shamsiMonths=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"],weekDayNames={0:"یکشنبه",1:"دوشنبه",2:"سه‌شنبه",3:"چهارشنبه",4:"پنج‌شنبه",5:"جمعه",6:"شنبه"},dayColors=['blue-600','indigo-600','purple-600','pink-600','red-600','orange-600','green-600'];
     const defaultWeeklySchedule={'شنبه':[{time:"08:00-09:30",task:"ریاضی(مسائل تمرینی)"},{time:"10:00-11:00",task:"علوم(مرور مفاهیم)"},{time:"11:30-12:00",task:"تمرین پیانو"},{time:"14:00-15:00",task:"فارسی(روخوانی و درک مطلب)"},{time:"16:00-17:00",task:"هوش کلامی"},{time:"17:00-18:30",task:"ترید+مرور اجتماعی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات زبان"}],'یکشنبه':[{time:"08:00-09:30",task:"هوش منطقی"},{time:"10:00-11:30",task:"هوش تصویری"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"دینی(مرور و حفظ آیات)"},{time:"16:00-17:00",task:"ریاضی(مرور فرمول‌ها)"},{time:"17:00-18:30",task:"ترید+مرور دینی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات"}],'دوشنبه':[{time:"08:00-09:30",task:"فارسی(املاء و معنی واژه‌ها)"},{time:"10:00-11:30",task:"عربی(قواعد+تمرین)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"هوش تصویری"},{time:"16:00-17:00",task:"علوم"},{time:"17:00-18:30",task:"ترید+مرور اجتماعی"},{time:"18:30-19:00",task:"کلاس پیانو"},{time:"19:00-21:00",task:"ترید+مرور سبک"}],'سه‌شنبه':[{time:"08:00-09:30",task:"ریاضی(سوالات تستی)"},{time:"10:00-11:30",task:"علوم(آزمایش‌ها و نکات)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"اجتماعی"},{time:"16:00-17:00",task:"دینی"},{time:"17:00-18:30",task:"ترید+مرور عربی"},{time:"18:30-20:00",task:"زبان(کلاس)"},{time:"20:00-21:00",task:"مرور لغات"}],'چهارشنبه':[{time:"08:00-09:30",task:"عربی(سوالات درک مطلب)"},{time:"10:00-11:30",task:"فارسی(نگارش و روخوانی)"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"علوم"},{time:"16:00-17:00",task:"ریاضی"},{time:"17:00-19:00",task:"ترید+مرور زبان"},{time:"19:00-21:00",task:"هوش کلامی"}],'پنج‌شنبه':[{time:"08:00-09:30",task:"دینی+اجتماعی"},{time:"10:00-11:30",task:"ریاضی"},{time:"12:00-12:30",task:"تمرین پیانو"},{time:"14:00-15:00",task:"هوش تصویری"},{time:"16:00-17:00",task:"مرور کلی دروس حفظی"},{time:"17:00-19:00",task:"ترید+مرور فارسی"},{time:"19:00-21:00",task:"زبان(مرور لغات+مکالمه)"}],'جمعه':[{time:"08:00-09:30",task:"آزمون شبیه‌ساز تیزهوشان"},{time:"10:00-11:00",task:"بررسی پاسخ‌ها"},{time:"11:30-12:00",task:"تمرین پیانو"},{time:"14:00-15:00",task:"تفریح و بازی"},{time:"16:00-17:00",task:"دیدار با خانواده"},{time:"17:00-19:00",task:"ترید+مرور سبک"},{time:"19:00-20:00",task:"جمع‌بندی هفتگی"}]};
     const backgroundImages=[{name:'کتابخانه',url:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2128&auto=format&fit=crop'},{name:'طبیعت',url:'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2400&auto=format&fit=crop'},{name:'انتزاعی',url:'https://images.unsplash.com/photo-1554147090-e1221a04a025?q=80&w=2348&auto=format&fit=crop'},{name:'کهکشان',url:'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2342&auto=format&fit=crop'},{name:'مینیمال',url:'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2225&auto=format&fit=crop'},{name:'کوهستان',url:'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=2340&auto=format&fit=crop'}];
+    const quotes=["موفقیت، توانایی رفتن از شکستی به شکست دیگر بدون از دست دادن شور و شوق است. - وینستون چرچیل","تنها راه انجام کارهای بزرگ، دوست داشتن کاری است که انجام می‌دهید. - استیو جابز","من در زندگی‌ام بارها و بارها شکست خورده‌ام و به همین دلیل است که موفق می‌شوم. - مایکل جردن","آینده متعلق به کسانی است که به زیبایی رویاهایشان ایمان دارند. - النور روزولت","برای شروع لازم نیست عالی باشی، اما برای عالی بودن باید شروع کنی. - زیگ زیگلار","محدودیت‌های شما تنها در ذهن شما وجود دارند. - ناپلئون هیل","غیرممکن فقط یک کلمه بزرگ است که توسط افراد کوچک به کار می‌رود. - محمد علی کلی"];
     
     // --- State ---
     let appState = {
-        history: JSON.parse(localStorage.getItem('studyHistory_v11')) || [],
-        masterSchedule: JSON.parse(localStorage.getItem('masterSchedule_v11')) || defaultWeeklySchedule,
+        history: JSON.parse(localStorage.getItem('studyHistory_v12')) || [],
+        masterSchedule: JSON.parse(localStorage.getItem('masterSchedule_v12')) || defaultWeeklySchedule,
+        weekSchedules: JSON.parse(localStorage.getItem('weekSchedules_v12')) || {},
         currentDate: new Date(),
         today: new Date(),
         isEditMode: false,
+        editContext: null, // 'week' or 'main'
         itemToProcess: null, // Can be a row <tr>
         actionToConfirm: null, // 'toggle', 'deleteMasterTask'
         taskToEdit: null, // {dayName, originalTask} for editing
+        activeChart: 'count'
     };
     appState.today.setHours(0, 0, 0, 0);
 
@@ -261,14 +287,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function getShamsiString(d){const[y,m,j]=toJalaali(d);return`${y}-${String(m).padStart(2,'0')}-${String(j).padStart(2,'0')}`}
     
     // --- Rendering ---
-    function renderWeek(d){appState.currentDate=new Date(d);let ws=new Date(appState.currentDate);ws.setDate(ws.getDate()-(ws.getDay()+1)%7);allDOMElements.scheduleGrid.innerHTML='';const o=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];let wd=[];for(let i=0;i<7;i++){let dd=new Date(ws);dd.setDate(ws.getDate()+i);wd.push(dd);const c=createDayCard(dd,o[i],i);allDOMElements.scheduleGrid.appendChild(c)}updateWeekRangeDisplay(wd[0],wd[6]);updateCharts()}
+    function renderWeek(d){appState.currentDate=new Date(d);let ws=new Date(appState.currentDate);ws.setDate(ws.getDate()-(ws.getDay()+1+7)%7);allDOMElements.scheduleGrid.innerHTML='';const o=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];let wd=[];for(let i=0;i<7;i++){let dd=new Date(ws);dd.setDate(ws.getDate()+i);wd.push(dd);const c=createDayCard(dd,o[i],i);allDOMElements.scheduleGrid.appendChild(c)}updateWeekRangeDisplay(wd[0],wd[6]);updateCharts()}
     
+    function getDailyTasks(date) {
+        const weekStartDate = new Date(date);
+        weekStartDate.setDate(weekStartDate.getDate() - (weekStartDate.getDay() + 1 + 7) % 7);
+        const weekShamsi = getShamsiString(weekStartDate);
+        
+        const dayName = weekDayNames[date.getDay()];
+        
+        if (appState.weekSchedules[weekShamsi] && appState.weekSchedules[weekShamsi][dayName]) {
+            return appState.weekSchedules[weekShamsi][dayName];
+        }
+        return appState.masterSchedule[dayName] || [];
+    }
+
     function createDayCard(d,dn,di){
         const shamsi=getShamsiString(d);
         const card=document.createElement('div');
         card.className=`day-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl shadow-lg overflow-hidden`;
         
-        let allTasks = appState.masterSchedule[dn] || [];
+        let allTasks = getDailyTasks(d);
         
         let trs=allTasks.map(item=>{
             const taskId=`${shamsi}-${item.task}`;
@@ -287,15 +326,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
-    // --- Modals & Context Menu ---
+    // --- Modals ---
     function showModal(m){m.classList.remove('hidden','opacity-0')}
     function hideModal(m){m.classList.add('opacity-0');setTimeout(()=>{m.classList.add('hidden');appState.itemToProcess=null;appState.actionToConfirm=null},300)}
     const tabs=allDOMElements.settingsModal.querySelectorAll('.settings-tab'),tabContents={timing:allDOMElements.settingsModal.querySelector('#timing-tab-content'),appearance:allDOMElements.settingsModal.querySelector('#appearance-tab-content')};tabs.forEach(t=>{t.addEventListener('click',()=>{tabs.forEach(tb=>tb.classList.remove('active'));t.classList.add('active');Object.values(tabContents).forEach(c=>c.classList.add('hidden'));tabContents[t.dataset.tab].classList.remove('hidden')})});
     
     // --- Appearance ---
-    function applyTheme(t){document.documentElement.className=t;allDOMElements.themeIconSun.classList.toggle('hidden',t==='dark');allDOMElements.themeIconMoon.classList.toggle('hidden',t!=='dark');localStorage.setItem('theme_v11',t);updateCharts()}
-    function applyBackground(u){if(u){allDOMElements.body.style.backgroundImage=`url('${u}')`;localStorage.setItem('backgroundUrl_v11',u)}else{allDOMElements.body.style.backgroundImage='none';localStorage.removeItem('backgroundUrl_v11')}document.querySelectorAll('.bg-thumbnail').forEach(t=>{t.classList.toggle('active',t.dataset.url===u)})}
-    function setupAppearance(){const st=localStorage.getItem('theme_v11')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');applyTheme(st);backgroundImages.forEach(b=>{const t=document.createElement('div');t.className='bg-thumbnail';t.style.backgroundImage=`url('${b.url}')`;t.dataset.url=b.url;t.title=b.name;allDOMElements.backgroundSelector.insertBefore(t,allDOMElements.removeBackgroundBtn)});const sb=localStorage.getItem('backgroundUrl_v11');if(sb){applyBackground(sb)}}
+    function applyTheme(t){document.documentElement.className=t;allDOMElements.themeIconSun.classList.toggle('hidden',t==='dark');allDOMElements.themeIconMoon.classList.toggle('hidden',t!=='dark');localStorage.setItem('theme_v12',t);updateCharts()}
+    function applyBackground(u){if(u){allDOMElements.body.style.backgroundImage=`url('${u}')`;localStorage.setItem('backgroundUrl_v12',u)}else{allDOMElements.body.style.backgroundImage='none';localStorage.removeItem('backgroundUrl_v12')}document.querySelectorAll('.bg-thumbnail').forEach(t=>{t.classList.toggle('active',t.dataset.url===u)})}
+    function setupAppearance(){const st=localStorage.getItem('theme_v12')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');applyTheme(st);backgroundImages.forEach(b=>{const t=document.createElement('div');t.className='bg-thumbnail';t.style.backgroundImage=`url('${b.url}')`;t.dataset.url=b.url;t.title=b.name;allDOMElements.backgroundSelector.insertBefore(t,allDOMElements.removeBackgroundBtn)});const sb=localStorage.getItem('backgroundUrl_v12');if(sb){applyBackground(sb)}}
 
     // --- Event Handlers ---
     allDOMElements.scheduleGrid.addEventListener('click', (e) => {
@@ -322,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    allDOMElements.confirmChangeBtn.addEventListener('click',()=>{if(!appState.actionToConfirm)return;if(appState.actionToConfirm==='deleteMasterTask'&&appState.itemToProcess){const{dayName,task}=appState.itemToProcess;appState.masterSchedule[dayName]=appState.masterSchedule[dayName].filter(t=>t.task!==task.task);saveMasterSchedule();renderWeek(appState.currentDate)}hideModal(allDOMElements.confirmationModal)});
+    allDOMElements.confirmChangeBtn.addEventListener('click',()=>{if(!appState.actionToConfirm)return;if(appState.actionToConfirm==='deleteMasterTask'&&appState.itemToProcess){const{dayName,task}=appState.itemToProcess;if(appState.editContext==='week'){const weekStart=new Date(appState.currentDate);weekStart.setDate(weekStart.getDate()-(weekStart.getDay()+1+7)%7);const weekShamsi=getShamsiString(weekStart);if(!appState.weekSchedules[weekShamsi]){appState.weekSchedules[weekShamsi]=JSON.parse(JSON.stringify(appState.masterSchedule))}appState.weekSchedules[weekShamsi][dayName]=appState.weekSchedules[weekShamsi][dayName].filter(t=>t.task!==task.task);localStorage.setItem('weekSchedules_v12',JSON.stringify(appState.weekSchedules))}else{appState.masterSchedule[dayName]=appState.masterSchedule[dayName].filter(t=>t.task!==task.task);saveMasterSchedule()}renderWeek(appState.currentDate)}hideModal(allDOMElements.confirmationModal)});
     allDOMElements.cancelChangeBtn.addEventListener('click',()=>hideModal(allDOMElements.confirmationModal));
     allDOMElements.openSettingsBtn.addEventListener('click',()=>showModal(allDOMElements.settingsModal));
     allDOMElements.closeSettingsBtn.addEventListener('click',()=>hideModal(allDOMElements.settingsModal));
@@ -333,22 +372,41 @@ document.addEventListener('DOMContentLoaded', () => {
     allDOMElements.backgroundUploadInput.addEventListener('change',(e)=>{const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=res=>{applyBackground(res.target.result);localStorage.setItem('backgroundUrl_v11',res.target.result)};reader.readAsDataURL(file)}});
 
     allDOMElements.editScheduleToggle.addEventListener('click', (e) => {
-        appState.isEditMode = !appState.isEditMode;
-        e.target.textContent = appState.isEditMode ? 'ذخیره تغییرات' : 'ویرایش برنامه اصلی';
-        e.target.classList.toggle('bg-amber-500', !appState.isEditMode);
-        e.target.classList.toggle('hover:bg-amber-600', !appState.isEditMode);
-        e.target.classList.toggle('bg-green-500', appState.isEditMode);
-        e.target.classList.toggle('hover:bg-green-600', appState.isEditMode);
-        allDOMElements.scheduleGrid.querySelectorAll('.task-actions, .add-task-btn').forEach(el => {
-            el.classList.toggle('hidden', !appState.isEditMode);
-        });
-        if (!appState.isEditMode) {
-            saveMasterSchedule();
+        e.stopPropagation();
+        allDOMElements.editOptions.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+        if (!allDOMElements.editModeContainer.contains(e.target)) {
+            allDOMElements.editOptions.classList.add('hidden');
         }
     });
 
-    function saveMasterSchedule() {
-        localStorage.setItem('masterSchedule_v11', JSON.stringify(appState.masterSchedule));
+    allDOMElements.editOptions.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            enterEditMode(e.target.dataset.editMode);
+            allDOMElements.editOptions.classList.add('hidden');
+        }
+    });
+
+    function enterEditMode(mode) {
+        appState.isEditMode = true;
+        appState.editContext = mode;
+        const buttonText = mode === 'week' ? 'ذخیره این هفته' : 'ذخیره برنامه اصلی';
+        allDOMElements.editScheduleToggle.textContent = buttonText;
+        allDOMElements.editScheduleToggle.classList.add('bg-green-500', 'hover:bg-green-600');
+        allDOMElements.editScheduleToggle.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+        allDOMElements.editScheduleToggle.onclick = exitEditMode;
+        renderWeek(appState.currentDate);
+    }
+    
+    function exitEditMode() {
+        appState.isEditMode = false;
+        appState.editContext = null;
+        allDOMElements.editScheduleToggle.innerHTML = `<span class="sm:hidden">ویرایش</span><span class="hidden sm:inline">ویرایش برنامه</span>`;
+        allDOMElements.editScheduleToggle.classList.remove('bg-green-500', 'hover:bg-green-600');
+        allDOMElements.editScheduleToggle.classList.add('bg-amber-500', 'hover:bg-amber-600');
+        allDOMElements.editScheduleToggle.onclick = () => allDOMElements.editOptions.classList.toggle('hidden');
+        renderWeek(appState.currentDate);
     }
     
     // --- Task Editor ---
@@ -372,22 +430,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (originalTask) { // Editing
-            const taskIndex = appState.masterSchedule[dayName].findIndex(t => t.task === originalTask.task);
-            if (taskIndex !== -1) {
-                appState.masterSchedule[dayName][taskIndex] = { task: newTitle, time: newTime };
+        let scheduleToEdit;
+        if (appState.editContext === 'week') {
+            const weekStart = new Date(appState.currentDate);
+            weekStart.setDate(weekStart.getDate() - (weekStart.getDay() + 1 + 7) % 7);
+            const weekShamsi = getShamsiString(weekStart);
+            
+            if (!appState.weekSchedules[weekShamsi]) {
+                appState.weekSchedules[weekShamsi] = JSON.parse(JSON.stringify(appState.masterSchedule));
             }
-        } else { // Adding
-            appState.masterSchedule[dayName].push({ task: newTitle, time: newTime });
+            scheduleToEdit = appState.weekSchedules[weekShamsi][dayName];
+        } else {
+            scheduleToEdit = appState.masterSchedule[dayName];
+        }
+
+        if (originalTask) {
+            const taskIndex = scheduleToEdit.findIndex(t => t.task === originalTask.task);
+            if (taskIndex !== -1) scheduleToEdit[taskIndex] = { task: newTitle, time: newTime };
+        } else {
+            scheduleToEdit.push({ task: newTitle, time: newTime });
         }
         
-        saveMasterSchedule();
+        if(appState.editContext === 'week') localStorage.setItem('weekSchedules_v11', JSON.stringify(appState.weekSchedules));
+        else saveMasterSchedule();
+        
         renderWeek(appState.currentDate);
         hideModal(allDOMElements.taskEditorModal);
     });
 
     // --- History & State Updates ---
-    function updateTaskHistory(row,isChecked){const taskObj=JSON.parse(row.dataset.taskObj);const taskId=`${getShamsiString(appState.currentDate)}-${taskObj.task}`;const day=row.closest('.day-card').querySelector('h2>span:first-child').textContent;if(isChecked){if(!appState.history.some(h=>h.id===taskId)){appState.history.push({id:taskId,date:getShamsiString(appState.currentDate),day,task:taskObj.task})}}else{appState.history=appState.history.filter(h=>h.id!==taskId)}localStorage.setItem('studyHistory_v11',JSON.stringify(appState.history));row.classList.toggle('task-completed',isChecked);updateCharts()}
+    function updateTaskHistory(row,isChecked){const taskObj=JSON.parse(row.dataset.taskObj);const taskId=`${row.dataset.dateStr}-${taskObj.task}`;const day=row.closest('.day-card').querySelector('h2>span:first-child').textContent;if(isChecked){if(!appState.history.some(h=>h.id===taskId)){appState.history.push({id:taskId,date:row.dataset.dateStr,day,task:taskObj.task,time:taskObj.time})}}else{appState.history=appState.history.filter(h=>h.id!==taskId)}localStorage.setItem('studyHistory_v12',JSON.stringify(appState.history));row.classList.toggle('task-completed',isChecked);updateCharts()}
     
     // Navigation and other handlers
     allDOMElements.prevWeekBtn.addEventListener('click',()=>{appState.currentDate.setDate(appState.currentDate.getDate()-7);renderWeek(appState.currentDate)});
@@ -398,11 +470,43 @@ document.addEventListener('DOMContentLoaded', () => {
     function exportToExcel(){if(appState.history.length===0){alert("تاریخچه‌ای برای خروجی گرفتن وجود ندارد.");return}let c="data:text/csv;charset=utf-8,\uFEFF";c+="تاریخ,روز هفته,شرح فعالیت\n";const s=[...appState.history].sort((a,b)=>a.date.localeCompare(b.date));s.forEach(i=>{const r=[i.date,i.day,`"${i.task.replace(/"/g,'""')}"`].join(",");c+=r+"\n"});const l=document.createElement("a");l.setAttribute("href",encodeURI(c));l.setAttribute("download","study_history.csv");allDOMElements.body.appendChild(l);l.click();allDOMElements.body.removeChild(l)}
     
     // Chart Logic
-    let subjectChartInstance=null,weeklyChartInstance=null;
+    let mainChartInstance = null;
     function getSubjectFromTask(t){const s=['ریاضی','علوم','فارسی','هوش','ترید','زبان','دینی','عربی','اجتماعی','پیانو','آزمون'];for(const subj of s){if(t.includes(subj))return subj}return'متفرقه'}
-    function updateCharts(){const isDark=document.documentElement.classList.contains('dark');const textColor=isDark?'#E5E7EB':'#374151';const gridColor=isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)';if(appState.history.length===0){allDOMElements.chartsContainer.classList.add('hidden');allDOMElements.noDataMessage.classList.remove('hidden');return}allDOMElements.chartsContainer.classList.remove('hidden');allDOMElements.noDataMessage.classList.add('hidden');const sC=appState.history.reduce((a,i)=>{const s=getSubjectFromTask(i.task);a[s]=(a[s]||0)+1;return a},{});const wO=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];const wC=wO.reduce((a,d)=>({...a,[d]:0}),{});appState.history.forEach(i=>{if(wC.hasOwnProperty(i.day))wC[i.day]++});renderSubjectChart(Object.keys(sC),Object.values(sC),textColor);renderWeeklyChart(Object.keys(wC),Object.values(wC),textColor,gridColor)}
-    function renderSubjectChart(l,d,tc){const c=document.getElementById('subject-chart').getContext('2d');if(subjectChartInstance)subjectChartInstance.destroy();subjectChartInstance=new Chart(c,{type:'doughnut',data:{labels:l,datasets:[{data:d,backgroundColor:['#3B82F6','#8B5CF6','#EC4899','#F97316','#10B981','#F59E0B','#6366F1','#D946EF','#06B6D4','#EF4444'],borderColor:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',borderWidth:3,hoverOffset:12}]},options:{responsive:true,animation:{duration:1000,easing:'easeOutQuart'},plugins:{legend:{position:'top',labels:{font:{family:'Vazirmatn'},color:tc}}}}})}
-    function renderWeeklyChart(l,d,tc,gc){const c=document.getElementById('weekly-chart').getContext('2d');if(weeklyChartInstance)weeklyChartInstance.destroy();const g=c.createLinearGradient(0,0,0,400);g.addColorStop(0,'rgba(59, 130, 246, 0.8)');g.addColorStop(1,'rgba(167, 139, 250, 0.8)');weeklyChartInstance=new Chart(c,{type:'bar',data:{labels:l,datasets:[{label:'تسک‌های انجام شده',data:d,backgroundColor:g,borderColor:'rgba(59, 130, 246, 1)',borderWidth:2,borderRadius:8,hoverBackgroundColor:'rgba(59, 130, 246, 1)'}]},options:{responsive:true,animation:{duration:1200,easing:'easeInOutBounce'},scales:{y:{beginAtZero:true,ticks:{color:tc,font:{family:'Vazirmatn'},stepSize:1},grid:{color:gc}},x:{ticks:{color:tc,font:{family:'Vazirmatn'}},grid:{color:gc}}},plugins:{legend:{display:false}}}})}
+    function updateCharts(){const isDark=document.documentElement.classList.contains('dark');const textColor=isDark?'#E5E7EB':'#374151';const gridColor=isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)';if(appState.history.length===0){allDOMElements.chartsContainer.classList.add('hidden');allDOMElements.noDataMessage.classList.remove('hidden');return}allDOMElements.chartsContainer.classList.remove('hidden');allDOMElements.noDataMessage.classList.add('hidden');renderChart(appState.activeChart)}
+    function switchChart(chartName) { appState.activeChart = chartName; updateCharts(); allDOMElements.chartTabs.querySelectorAll('.chart-tab').forEach(t => t.classList.toggle('active', t.dataset.chart === chartName)); }
+    allDOMElements.chartTabs.addEventListener('click', e => { if (e.target.matches('.chart-tab')) switchChart(e.target.dataset.chart) });
+    
+    function renderChart(chartName) {
+        if(mainChartInstance) mainChartInstance.destroy();
+        const isDark = document.documentElement.classList.contains('dark');
+        const textColor = isDark ? '#E5E7EB' : '#374151';
+        const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+        const ctx = allDOMElements.mainChartCanvas.getContext('2d');
+        let chartConfig;
+
+        switch (chartName) {
+            case 'count':
+                const sC=appState.history.reduce((a,i)=>{const s=getSubjectFromTask(i.task);a[s]=(a[s]||0)+1;return a},{});
+                chartConfig = {type:'doughnut',data:{labels:Object.keys(sC),datasets:[{data:Object.values(sC),backgroundColor:['#3B82F6','#8B5CF6','#EC4899','#F97316','#10B981','#F59E0B','#6366F1','#D946EF','#06B6D4','#EF4444'],borderColor:document.documentElement.classList.contains('dark')?'#1f2937':'#fff',borderWidth:3,hoverOffset:12}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Vazirmatn'},color:textColor}}}}};
+                break;
+            case 'time':
+                const sT = appState.history.reduce((a, i) => { const s = getSubjectFromTask(i.task); a[s] = (a[s] || 0) + 1; return a; }, {});
+                chartConfig = {type:'pie',data:{labels:Object.keys(sT),datasets:[{data:Object.values(sT),backgroundColor:['#3B82F6','#8B5CF6','#EC4899','#F97316','#10B981','#F59E0B','#6366F1','#D946EF','#06B6D4','#EF4444'].reverse(),borderWidth:3,hoverOffset:12}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Vazirmatn'},color:textColor}}}}};
+                break;
+            case 'daily':
+                const tD={labels:[],data:[]};for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const shamsi=getShamsiString(d);const[y,m,day]=toJalaali(d);tD.labels.push(`${day} ${shamsiMonths[m-1]}`);const dailyTotal=appState.history.filter(h=>h.date===shamsi).length;tD.data.push(dailyTotal)}
+                chartConfig={type:'line',data:{labels:tD.labels,datasets:[{label:'تسک‌های انجام شده',data:tD.data,borderColor:'#4f46e5',backgroundColor:'rgba(79, 70, 229, 0.1)',fill:true,tension:0.4,pointBackgroundColor:'#4f46e5',pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{color:textColor,font:{family:'Vazirmatn'},stepSize:1},grid:{color:gridColor}},x:{ticks:{color:textColor,font:{family:'Vazirmatn'}},grid:{color:gridColor}}},plugins:{legend:{display:false}}}};
+                break;
+            case 'weekly':
+                const wO=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];
+                const wC=wO.reduce((a,d)=>({...a,[d]:0}),{});
+                appState.history.forEach(i=>{if(wC.hasOwnProperty(i.day))wC[i.day]++});
+                const g=ctx.createLinearGradient(0,0,0,400);g.addColorStop(0,'rgba(59, 130, 246, 0.8)');g.addColorStop(1,'rgba(167, 139, 250, 0.8)');
+                chartConfig={type:'bar',data:{labels:wO,datasets:[{label:'تسک‌های انجام شده',data:Object.values(wC),backgroundColor:g,borderColor:'rgba(59, 130, 246, 1)',borderWidth:2,borderRadius:8,hoverBackgroundColor:'rgba(59, 130, 246, 1)'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{color:textColor,font:{family:'Vazirmatn'},stepSize:1},grid:{color:gridColor}},x:{ticks:{color:textColor,font:{family:'Vazirmatn'}},grid:{color:gridColor}}},plugins:{legend:{display:false}}}};
+                break;
+        }
+        mainChartInstance = new Chart(ctx, chartConfig);
+    }
     
     // Clock and Pomodoro
     function updateClock(){
@@ -420,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const[start,end]=l.time.split('-');
                     if(c>=start&&c<end){
                         t=l.task;
-                        break
+                        break;
                     }
                 }
             }
