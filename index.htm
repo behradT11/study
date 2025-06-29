@@ -94,14 +94,20 @@
             <div class="flex justify-center items-center gap-4"><button id="start-pause-button" class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">شروع</button><button id="reset-button" class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-500 transition">ریست</button></div>
         </section>
 
-        <section class="mb-8 flex justify-between items-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-3 rounded-xl shadow-md sticky top-2 z-10">
-             <button id="next-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">هفته بعد &larr;</button>
-            <div class="text-center">
+        <section class="mb-8 flex flex-wrap justify-center sm:justify-between items-center gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md p-3 rounded-xl shadow-md sticky top-2 z-10">
+            <button id="prev-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">&rarr; هفته قبل</button>
+            
+            <div class="text-center order-first w-full sm:w-auto sm:order-none">
                  <h2 id="week-range-display" class="text-lg font-bold text-gray-800 dark:text-gray-200"></h2>
                  <button id="today-btn" class="text-sm text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition">بازگشت به هفته جاری</button>
             </div>
-             <button id="edit-schedule-toggle" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-transform transform hover:scale-105">ویرایش برنامه اصلی</button>
-            <button id="prev-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">&rarr; هفته قبل</button>
+
+            <button id="edit-schedule-toggle" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-transform transform hover:scale-105 grow sm:grow-0">
+                <span class="sm:hidden">ویرایش</span>
+                <span class="hidden sm:inline">ویرایش برنامه اصلی</span>
+            </button>
+            
+            <button id="next-week-btn" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-transform transform hover:scale-105">هفته بعد &larr;</button>
         </section>
 
         <main id="schedule-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
